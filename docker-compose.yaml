@@ -2,7 +2,7 @@ version: '3.9'
 services:
   shopdb:
     image: mongo:5.0.0
-    container_name: entries-database
+    container_name: shopdb-database
     ports:
       - 27017:27017
     volumes:
