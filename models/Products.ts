@@ -35,8 +35,7 @@ const productSchema = new Schema({
     timestamps: true
 });
 
-//TODO: crear indice de mongo
-
+productSchema.index({ title: 'text', tags: 'text' })
 const Product: Model<IProduct> = mongoose.models.Product || model('Product', productSchema)
 
 
