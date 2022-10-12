@@ -8,17 +8,20 @@ export interface UiState {
 
 
 const Ui_INITIAL_STATE: UiState = {
-   isMenuOpen: true
+   isMenuOpen: false
 }
 
 
 export const UiProvider:FC<PropsWithChildren> = ({ children }) => {
 
  const [state, dispatch] = useReducer( uiReducer, Ui_INITIAL_STATE );
-
+ const toggleSideMenu = () => {
+    dispatch({ type: '[Ui] - ToggleMenu' })
+ }
  return (
     <UiContext.Provider value={{
-        ...state
+        ...state,
+        toggleSideMenu
     }}>
           { children }
     </UiContext.Provider>
