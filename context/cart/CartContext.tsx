@@ -4,6 +4,8 @@ import { ICartProduct } from '../../interfaces'
 
 interface ContextProps {
    cart: ICartProduct[]
+
+   addProduct: (product: ICartProduct) => void
 }
 
 

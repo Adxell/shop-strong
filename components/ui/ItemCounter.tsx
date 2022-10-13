@@ -11,18 +11,20 @@ export const ItemCounter: FC<Props> = ({ currentValue, maxQuantity, onChangeQuan
   
   return (
     <Box display={'flex'} alignItems='center'>
-        <IconButton>
           { currentValue <= 1
             ? (
-              <RemoveCircleOutline  />
+              <IconButton>
+                <RemoveCircleOutline  />
+              </IconButton>
             )
             : (
-              <RemoveCircleOutline  
-                onClick={() => onChangeQuantity( currentValue - 1 )} 
-              />
+              <IconButton 
+                onClick={() => onChangeQuantity( currentValue - 1 )}
+              >
+                <RemoveCircleOutline />
+              </IconButton>
             )
         }
-        </IconButton>
         <Typography sx={{ width: 40, textAlign: 'center' }}> {currentValue} </Typography>
          {
           currentValue >= maxQuantity
@@ -32,8 +34,10 @@ export const ItemCounter: FC<Props> = ({ currentValue, maxQuantity, onChangeQuan
               </IconButton>
             )
             :(
-              <IconButton>
-                <AddCircleOutline  onClick={() => onChangeQuantity( currentValue + 1 )} />
+              <IconButton 
+                onClick={() => onChangeQuantity( currentValue + 1 )}
+              >
+                <AddCircleOutline   />
               </IconButton>
             )
          }

@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useContext, useState } from 'react'
 import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next'
 
 import { Box, Button, Chip, Grid, Typography } from '@mui/material'
@@ -9,6 +9,8 @@ import { ItemCounter } from '../../components/ui'
 import { ICartProduct, IProduct, ISize } from '../../interfaces'
 import { dbProducts } from '../../database'
 import { ImageSearch } from '@mui/icons-material'
+import { CartContext } from '../../context'
+import { useRouter } from 'next/router'
 
 interface Props {
   product: IProduct
@@ -16,7 +18,8 @@ interface Props {
 const ProductPage: FC<Props> = ({ product }) => {
   // const router = useRouter();
   // const {products: product, isLoading, isError} = useProducts<IProduct>(`/products/${ router.query.slug }`)
-
+  const {addProduct} = useContext(CartContext)
+  const router = useRouter()
   const [tempCartProduct, setTempCartProduct] = useState<ICartProduct>({
     _id: product._id,
     image: product.images[1],
@@ -44,7 +47,9 @@ const ProductPage: FC<Props> = ({ product }) => {
 
   const AddProduct = () => {
     if ( !tempCartProduct.size ) return
-    console.log({tempCartProduct})
+    addProduct(tempCartProduct)
+
+    router.push('/cart')
   }
   return (
     <ShopLayout title={ product.title } pageDescription={ product.description }>
