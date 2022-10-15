@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { Box, Button, Chip, Grid, Link, TextField, Typography } from '@mui/material';
 import { AuthLayout } from '../../components/layout';
 import { validation } from '../../utils';
-import { tesloApi } from '../../api';
 import { useContext, useState } from 'react';
 import { ErrorOutline } from '@mui/icons-material';
 import { useRouter } from 'next/router';
@@ -32,7 +31,8 @@ const RegisterPage = () => {
             setTimeout(()=> setShowError(false), 3000)
             return 
         }
-        router.replace('/')
+        const destination = router.query.p?.toString() || '/';
+        router.replace(destination)
     }
 
   return (
@@ -106,7 +106,10 @@ const RegisterPage = () => {
                     </Grid>
                 </Grid>
                 <Grid item xs={12} display='flex' justifyContent='end'>
-                    <NextLink href="/auth/login" passHref>
+                    <NextLink 
+                        href={ router.query.p ? `/auth/register?=${router.query.p}`: '/auth/register'} 
+                        passHref
+                    >
                         <Link underline='always'>
                             ¿Ya tienes cuenta?
                         </Link>

@@ -18,6 +18,7 @@
     "D": "^1.0.0",
     "axios": "^1.1.2",
     "bcryptjs": "^2.4.3",
+    "jose": "^4.10.0",
     "js-cookie": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.6.5",
