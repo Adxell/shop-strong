@@ -5,7 +5,7 @@ import { FC, PropsWithChildren, useEffect, useReducer } from 'react'
 import { tesloApi } from '../../api';
 import { IUser } from '../../interfaces';
 import { AuthContext, authReducer } from './'
-
+import { useSession, signOut } from 'next-auth/react';
 
 export interface AuthState {
    isLoggedIn: boolean;
@@ -21,12 +21,19 @@ const Auth_INITIAL_STATE: AuthState = {
 
 export const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
 
+   const {data, status} = useSession()
 
    const [state, dispatch] = useReducer( authReducer, Auth_INITIAL_STATE );
    const router = useRouter()
    useEffect(() => {
-      checkToken();
-   }, [])
+       if ( status === 'authenticated' ){
+         dispatch({ type: '[Auth] - Login', payload: data?.user as IUser})
+       }
+   }, [status, data])
+   
+   // useEffect(() => {
+   //    checkToken();
+   // }, [])
    
    const checkToken = async() =>{
       if (!Cookies.get('token')) {
@@ -77,7 +84,7 @@ export const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
    }
 
    const logout = () => {
-      Cookies.remove('token');
+      // Cookies.remove('token');
       Cookies.remove('cart')
       Cookies.remove('firstName')
       Cookies.remove('lastName') 
@@ -87,8 +94,8 @@ export const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
       Cookies.remove('city')     
       Cookies.remove('country')  
       Cookies.remove('phone')    
-      
-      router.reload();
+      signOut()
+      // router.reload();
    }
    return (
       <AuthContext.Provider value={{
