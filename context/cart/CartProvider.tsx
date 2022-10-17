@@ -1,7 +1,9 @@
 import { FC, PropsWithChildren, useEffect, useReducer, useRef } from 'react'
 import { CartContext, cartReducer } from './'
-import { ICartProduct } from '../../interfaces'
+import { ICartProduct, IOrder, ShippingAddress } from '../../interfaces'
 import Cookies from 'js-cookie'
+import { tesloApi } from '../../api';
+import axios from 'axios';
 
 export interface CartState {
    isLoaded: boolean;
@@ -13,16 +15,6 @@ export interface CartState {
    shippingAddress?: ShippingAddress
 }
 
-export interface ShippingAddress {
-      firstName : string;
-      lastName  : string;
-      address   : string;
-      address2? : string;
-      zip       : string;
-      city      : string;
-      country   : string;
-      phone     : string;
-   }
 
 
 const CART_INITIAL_STATE: CartState = {
@@ -134,13 +126,54 @@ export const CartProvider:FC<PropsWithChildren> = ({ children }) => {
       dispatch({type: '[Cart] - UpdateAddress', payload: address})
   }
 
+  const createOrder = async():Promise<{hasError: boolean; message: string}> =>{
+
+   if ( !state.shippingAddress ) {
+      throw new Error('No hay dirrecion')
+   }
+
+   const body: IOrder = {
+      orderItems: state.cart.map( p => ({
+         ...p, 
+         size: p.size!
+      })),
+      shippingAddress: state.shippingAddress,
+      numberOfItems: state.numberOfItems,
+      subTotal: state.subTotal,
+      tax: state.tax,
+      total: state.total,
+      isPaid: false
+   }
+   try{
+      const { data } = await tesloApi.post<IOrder>('/orders', body)
+
+      return {
+         hasError: false,
+         message: data._id!
+      }
+   }catch(error){
+      if ( axios.isAxiosError(error) ) {
+         return {
+            hasError: true,
+            message: error.response.data.message
+         }
+      }
+      return {
+         hasError: true,
+         message: 'Error no controlado'
+      }
+   }
+  }
+
   return (
     <CartContext.Provider value={{
         ...state,
         addProduct,
         updateCartQuantity,
         removeProductInCart,
-        updateAddres
+        updateAddres,
+
+        createOrder
     }}>
           { children }
     </CartContext.Provider>
