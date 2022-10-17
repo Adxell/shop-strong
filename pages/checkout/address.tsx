@@ -1,10 +1,10 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import { ShopLayout } from '../../components/layout'
 import { countries, jwt } from '../../utils'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import Cookies from 'js-cookie'
 import { CartContext } from '../../context'
 
@@ -19,16 +19,16 @@ type FormData = {
     phone     : string;
 }
 
-const getAddresFromCookie = (): FormData => {
+const getAddressFromCookies = (cleanRender: boolean): FormData => {
     return {
-        firstName:  Cookies.get('firstName') || '',
-        lastName:   Cookies.get('lastName')  || '',
-        address:    Cookies.get('address')   || '',
-        address2:   Cookies.get('address2')  || '',
-        zip:        Cookies.get('zip')       || '',
-        city:       Cookies.get('city')      || '',
-        country:    Cookies.get('country')   || '',
-        phone:      Cookies.get('phone')     || '',
+        firstName: cleanRender ? '' : Cookies.get('firstName') || '',
+        lastName:  cleanRender ? '' :  Cookies.get('lastName')  || '',
+        address:   cleanRender ? '' :  Cookies.get('address')   || '',
+        address2:  cleanRender ? '' :  Cookies.get('address2')  || '',
+        zip:       cleanRender ? '' :  Cookies.get('zip')       || '',
+        city:      cleanRender ? '' :  Cookies.get('city')      || '',
+        country:   cleanRender ? '' :  Cookies.get('country')   || '',
+        phone:     cleanRender ? '' :  Cookies.get('phone')     || '',
     }
 }
 const AddressPage = () => {
@@ -37,9 +37,14 @@ const AddressPage = () => {
 
     const { updateAddres, shippingAddress } = useContext(CartContext)
 
-    const { register, handleSubmit, formState: { errors }} = useForm<FormData>({
-        defaultValues: getAddresFromCookie()
+    const { register, reset, control, handleSubmit, formState: { errors } } = useForm<FormData>({
+        defaultValues: {...getAddressFromCookies(true)}
     })
+
+    useEffect(() => {
+		reset(getAddressFromCookies(false));
+	}, [reset]);
+
     const onSubmitAddress = ( data: FormData ) => {
         updateAddres(data)
         router.push('/checkout/summary')
@@ -52,95 +57,124 @@ const AddressPage = () => {
             </Typography>
             <Grid container spacing={ 2 } sx={{ mt: 2}}>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                     label='Nombre'
-                     variant='filled'
-                     fullWidth
-                     {
-                        ...register('firstName', {
-                            required: 'Este campo es obligatorio',
-                        })
-                     }
-                     error = {!!errors.firstName}
-                     helperText = { errors.firstName?.message}
-                     />
+                    <Controller
+							name='firstName'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Nombre'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+									error={!!errors.firstName}
+									helperText={errors.firstName?.message}
+								/>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                        label='Apellido'
-                        variant='filled'
-                        fullWidth
-                        {
-                        ...register('lastName', {
-                            required: 'Este campo es obligatorio',
-                        })
-                        }
-                        error = {!!errors.lastName}
-                        helperText = { errors.lastName?.message}
-                    />
+                    <Controller
+							name='lastName'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Apellido'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+									error={!!errors.lastName}
+									helperText={errors.lastName?.message}
+								/>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                        label='Direccion'
-                        variant='filled'
-                        fullWidth
-                        {
-                        ...register('address', {
-                            required: 'Este campo es obligatorio',
-                        })
-                        }
-                        error = {!!errors.address}
-                        helperText = { errors.address?.message}
-                    />
+                    <Controller
+							name='address'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Dirección'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+									error={!!errors.address}
+									helperText={errors.address?.message}
+								/>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                        label='Direccion 2 (opcional)' 
-                        variant='filled'
-                        fullWidth
-                        {
-                        ...register('address2', {
-                            required: false,
-                        })
-                        }
-                    />
+                    <Controller
+							name='address2'
+							control={control}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Dirección 2 (opcional)'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+								/>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                        label='Codigo postal'
-                        variant='filled'
-                        fullWidth
-                        {
-                            ...register('zip', {
-                                required: 'Este campo es obligatorio',
-                            })
-                        }
-                        error = {!!errors.zip}
-                        helperText = { errors.zip?.message}
-                    />
+                   <Controller
+							name='zip'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Código Postal'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+									error={!!errors.zip}
+									helperText={errors.zip?.message}
+								/>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                        label='Ciudad'
-                        variant='filled'
-                        fullWidth
-                        {
-                            ...register('city', {
-                                required: 'Este campo es obligatorio',
-                            })
-                        }
-                        error = {!!errors.city}
-                        helperText = { errors.city?.message}
-                    />
+                        <Controller
+							name='city'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Ciudad'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+									error={!!errors.city}
+									helperText={errors.city?.message}
+								/>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <FormControl fullWidth>
+                    {/* <FormControl fullWidth>
                         <TextField
                             key={ Cookies.get('country')  || countries[0].code }
                             select
                             variant='filled'
                             label='Pais'
-                            defaultValue={Cookies.get('country')  || countries[0].code}
+                            defaultValue={Cookies.get('country')}
                             {
                                 ...register('country', {
                                     required: 'Este campo es obligatorio',
@@ -158,21 +192,45 @@ const AddressPage = () => {
                                 ))
                             }
                         </TextField>
-                    </FormControl>
+                    </FormControl> */}
+                   <Controller
+							name='country'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<FormControl fullWidth error={!!errors.country}>
+									<InputLabel>Country</InputLabel>
+									<Select {...field} label='Country'>
+										{countries.map(country => (
+											<MenuItem key={country.code} value={country.code}>
+												{country.name}
+											</MenuItem>
+										))}
+									</Select>
+									<FormHelperText>{errors.country?.message}</FormHelperText>
+								</FormControl>
+							)}
+						/>
                 </Grid>
                 <Grid item xs={12} sm={ 6 }>
-                    <TextField 
-                        label='Telefono'
-                        variant='filled'
-                        fullWidth
-                        {
-                            ...register('phone', {
-                               required: 'Este campo es obligatorio',
-                                })
-                        }
-                        error = {!!errors.phone}
-                        helperText = { errors.phone?.message}
-                        />
+                        <Controller
+							name='phone'
+							control={control}
+							rules={{ required: 'Este campo es requerido' }}
+							defaultValue={''}
+							render={({ field }) => (
+								<TextField
+									label='Teléfono'
+									variant='filled'
+									value={field.value}
+									onChange={field.onChange}
+									fullWidth
+									error={!!errors.phone}
+									helperText={errors.phone?.message}
+								/>
+							)}
+						/>
                 </Grid>
             </Grid>
 
