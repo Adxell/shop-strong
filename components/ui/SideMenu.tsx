@@ -63,7 +63,7 @@ export const SideMenu = () => {
                                 <ListItemText primary={'Perfil'} />
                             </ListItem>
 
-                            <ListItem button>
+                            <ListItem button onClick={()=> navigateTo('/orders/history')}>
                                 <ListItemIcon>
                                     <ConfirmationNumberOutlined/>
                                 </ListItemIcon>
@@ -72,8 +72,6 @@ export const SideMenu = () => {
                         </>
                     )
                 }
-
-
                 <ListItem
                    button sx={{ display: { xs: '', sm: 'none' } }}
                    onClick={() => navigateTo('/category/men')}
