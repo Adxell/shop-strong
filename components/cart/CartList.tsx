@@ -3,24 +3,26 @@ import NextLink from 'next/link'
 import { CardActionArea, CardMedia, Grid, Link, Box, Typography, Button } from '@mui/material'
 import { ItemCounter } from '../ui'
 import { CartContext } from '../../context'
-import { ICartProduct } from '../../interfaces'
+import { ICartProduct, IOrderItem } from '../../interfaces'
 
 
 
 interface Props {
     editable: boolean; 
+    products?: IOrderItem[];
 }
-export const CartList: FC<Props> = ({ editable }) => {
+export const CartList: FC<Props> = ({ editable, products }) => {
   const { cart, updateCartQuantity, removeProductInCart } = useContext(CartContext)
 
   const onNewCartQuantityValue = ( product: ICartProduct, newQuantityValue: number ) => {
     product.quantity = newQuantityValue
     updateCartQuantity(product)
   }
+  const productsToShow = products ? products : cart
   return (
     <>
         {
-            cart.map( product => (
+            productsToShow.map( product => (
                <Grid container spacing={2} key={ product.slug + product.size } sx={{ mb: 1 }}>
                     <Grid item xs={3}>
                         <NextLink href={`/products/${ product.slug }`} passHref>

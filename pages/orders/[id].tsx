@@ -1,6 +1,7 @@
 import React from 'react' 
 import { GetServerSideProps, NextPage } from 'next'
-import NextLink from 'next/link'
+import { PayPalButtons } from '@paypal/react-paypal-js'
+
 import { Box, Card, CardContent, Chip, Divider, Grid, Link, Typography } from '@mui/material'
 import { CartList, OrdenSummary } from '../../components/cart'
 import { ShopLayout } from '../../components/layout'
@@ -14,67 +15,89 @@ interface Props {
 }
 
 const OrderPage: NextPage<Props> = ({order}) => {
-    console.log(order)
+   const { shippingAddress } = order;
   return (
-    <ShopLayout title='Resumen de la orden 123456' pageDescription='Resumen de la orden'>
+    <ShopLayout title='Resumen de la orden' pageDescription='Resumen de la orden'>
         <Typography variant='h1' component='h1'>
-            Orden: 12345
+            Orden: { order._id }
         </Typography>
-        {/* <Chip 
-            sx={{ my: 2 }}
-            label="Pendiente de pago"
-            variant="outlined"
-            color="error"
-            icon={<CreditCardOffOutlined />}
-        /> */}
-        <Chip 
-            sx={{ my: 2 }}
-            label="Pagada"
-            variant="outlined"
-            color="success"
-            icon={<CreditScoreOutlined />}
-        />
-        <Grid container>
+        {
+            order.isPaid
+            ? (
+            <Chip 
+                sx={{ my: 2 }}
+                label="Pagada"
+                variant="outlined"
+                color="success"
+                icon={<CreditScoreOutlined />}
+            />
+            ):
+            (
+            <Chip 
+                sx={{ my: 2 }}
+                label="Pendiente de pago"
+                variant="outlined"
+                color="error"
+                icon={<CreditCardOffOutlined />}
+            /> 
+            )
+        }
+        <Grid container className="fadeIn">
             <Grid item xs={12} sm={ 7 }>
-                <CartList editable={false} />
+                <CartList editable={false} products={ order.orderItems } />
             </Grid>
             <Grid item xs={12} sm={ 5 }>
                 <Card>
                     <CardContent>
-                        <Typography variant='h2'>Resulmen (3 productos)</Typography>
+                        <Typography variant='h2'>Resulmen ({ order.numberOfItems } {order.numberOfItems > 1 ? 'productos' : 'producto'})</Typography>
                         <Divider sx={{ my: 1 }}/>
-                        <Box display='flex' justifyContent='end'>
-                            <NextLink href='/checkout/address' passHref>
-                                <Link underline='always' className='a'>
-                                    Editar
-                                </Link>
-                            </NextLink>
-                        </Box>
                         <Typography variant='subtitle1'>Direccion de entrega</Typography>
-                        <Typography>Adxell Aranago</Typography>
-                        <Typography>Barranquilla-Colombi</Typography>
-                        <Typography>Kr 28 # 12-08</Typography>
+                        <Typography>{ shippingAddress.firstName } { shippingAddress.lastName }</Typography>
+                        <Typography>{ shippingAddress.city }-{ shippingAddress.country}</Typography>
+                        <Typography>{ shippingAddress.address } { shippingAddress.address2 ? `${shippingAddress.address2}` : '' }</Typography>
+                        <Typography>{ shippingAddress.zip }</Typography>
+                        <Typography>{ shippingAddress.phone }</Typography>
                         <Divider sx={{ my: 1 }}/>
-                        <Box display='flex' justifyContent='end'>
-                            <NextLink href='/cart' passHref>
-                                <Link underline='always' className='a'>
-                                    Editar
-                                </Link>
-                            </NextLink>
-                        </Box>
-                        <OrdenSummary/>
-
-                        <Box sx={{ mt: 3 }}>
-                            {/* TODO */}
-                            <Typography variant='h1' component='h1'>Pagar</Typography>
-                        </Box>
-                        <Chip 
-                            sx={{ my: 2 }}
-                            label="Pagada"
-                            variant="outlined"
-                            color="success"
-                            icon={<CreditScoreOutlined />}
+                   
+                        <OrdenSummary 
+                            orderValues={{
+                                numberOfItems: order.numberOfItems,
+                                subTotal: order.subTotal,
+                                tax: order.tax,
+                                total: order.total
+                            }}
                         />
+
+                        <Box sx={{ mt: 3 }} display='flex' flexDirection="column">
+                            {/* TODO */}
+                            {
+                                order.isPaid
+                                ?(
+                                    <Chip 
+                                        sx={{ my: 2 }}
+                                        label="Pagada"
+                                        variant="outlined"
+                                        color="success"
+                                        icon={<CreditScoreOutlined />}
+                                    />
+                                ):
+                                (
+                                    <PayPalButtons 
+                                        createOrder={(data, actions) => {
+                                            return actions.order.create({
+                                                purchase_units: [
+                                                    {
+                                                        amount: {
+                                                            value: '1.99',
+                                                        }
+                                                    }
+                                                ]
+                                            })
+                                        }}
+                                    />
+                                )
+                            }
+                        </Box>
                     </CardContent>
                 </Card>
             </Grid>

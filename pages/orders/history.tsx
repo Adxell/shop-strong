@@ -1,8 +1,14 @@
 import React from 'react'
+import { GetServerSideProps, NextPage } from 'next'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { Chip, Grid, Link, Typography } from '@mui/material'
 import { ShopLayout } from '../../components/layout'
 import NextLink from 'next/link'
+import { getSession } from 'next-auth/react'
+import { dbOrders } from '../../database'
+import { IOrder } from '../../interfaces'
+
+
 const columns: GridColDef[] = [
     {field: 'id', headerName: 'ID', width: 100},
     {field: 'fullname', headerName: 'Nombre Completo', width: 300},
@@ -27,7 +33,7 @@ const columns: GridColDef[] = [
         sortable: false,
         renderCell: (params) => {
             return (
-                <NextLink href={`/orders/${ params.value }`} passHref>
+                <NextLink href={`/orders/${ params.row.order }`} passHref>
                     <Link underline='always'>
                         Ver orden
                     </Link>
@@ -36,23 +42,18 @@ const columns: GridColDef[] = [
         }
     },
 ]
-const rows = [
-    {id: 1, paid: false, orden: 'asdu12asdhgy1',fullname: 'Lucas'},
-    {id: 2, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 3, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 4, paid: false, orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 5, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 6, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 7, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 8, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 9, paid: false, orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 10, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 11, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 12, paid: true , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-    {id: 13, paid: false , orden: 'asdu12asdhgy1',fullname: 'Adxell Arango'},
-]
 
-const HistoryPage = () => {
+interface Props{
+    orders: IOrder[]
+}
+const HistoryPage: NextPage<Props> = ({ orders }) => {
+    console.log(orders)
+    const rows = orders.map( (order, id) => ({
+        id: id + 1,
+        paid: order.isPaid,
+        fullname: `${ order.shippingAddress.firstName } ${ order.shippingAddress.lastName }`,
+        order: order._id
+    }))
   return (
     <ShopLayout title={'Historial de compras'} pageDescription={'Historial de ordenes del cliente'}>
         <Typography variant='h1' component='h1'>Historial de ordenes</Typography>
@@ -70,4 +71,25 @@ const HistoryPage = () => {
   )
 }
 
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+    const session: any = await getSession({ req }) 
+
+    if ( !session ) {
+        return {
+            redirect: {
+                destination: '/auth/login?p=/orders/history',
+                permanent: false
+            }
+        }
+    }
+
+    const orders = await dbOrders.getOrderByUser( session.user.id )
+
+    return {
+        props: {
+            orders
+        }
+    }
+}
 export default HistoryPage
