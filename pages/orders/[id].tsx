@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { GetServerSideProps, NextPage } from 'next'
 import { PayPalButtons } from '@paypal/react-paypal-js'
 
-import { Box, Card, CardContent, Chip, Divider, Grid, Link, Typography } from '@mui/material'
+import { Box, Card, CardContent, Chip, CircularProgress, Divider, Grid, Link, Typography } from '@mui/material'
 import { CartList, OrdenSummary } from '../../components/cart'
 import { ShopLayout } from '../../components/layout'
 import { CreditCardOffOutlined, CreditScoreOutlined } from '@mui/icons-material'
@@ -29,11 +29,13 @@ export type OrderResponseBody = {
 const OrderPage: NextPage<Props> = ({ order }) => {
     const router = useRouter()
     const { shippingAddress } = order;
+    const [isPaying, setIsPaying] = useState(false)
 
     const onOrderCompleted = async (details: OrderResponseBody)=>{
         if ( details.status !== 'COMPLETED' ){
             return alert('No hay pago en paypal')
         }
+        setIsPaying(true)
 
         try {
             const { data } = await tesloApi.post(`/orders/pay`, {
@@ -42,6 +44,7 @@ const OrderPage: NextPage<Props> = ({ order }) => {
             })
             router.reload()
         } catch (error) {
+            setIsPaying(false)
             alert('Error')
             console.log(error)
         }
@@ -99,6 +102,18 @@ const OrderPage: NextPage<Props> = ({ order }) => {
                             />
 
                             <Box sx={{ mt: 3 }} display='flex' flexDirection="column">
+
+                                <Box 
+                                    display="flex" 
+                                    justifyContent="center" 
+                                    className="fadeIn"
+                                    sx={{display: isPaying ? 'flex' : 'none' }}>
+                                    <CircularProgress />
+                                </Box>
+
+                                <Box
+                                    flexDirection='column'
+                                    sx={{ display: isPaying ? 'none' : 'flex', flex: 1 }}>
                                 {
                                     order.isPaid
                                         ? (
@@ -134,6 +149,7 @@ const OrderPage: NextPage<Props> = ({ order }) => {
                                             />
                                         )
                                 }
+                                </Box>
                             </Box>
                         </CardContent>
                     </Card>
