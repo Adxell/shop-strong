@@ -15,10 +15,24 @@ export async function middleware(req:NextRequest| any) {
     // }
 
     // const session = await getToken({req, secret: process.env.NEXTAUTH_SECRET})
-    const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    if (!session) {
+    const session: any = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if ( !session ) {
         const { protocol, host, pathname } = req.nextUrl;
         return NextResponse.redirect(`${protocol}//${host}/auth/login?p=${pathname}`);
+    }
+
+    const validRoles = ['admin']
+
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+        if(!validRoles.includes(session.user.role)) {
+            return NextResponse.redirect(new URL('/', req.url))
+        }
+    }
+
+    if (req.nextUrl.pathname.startsWith('/api/admin')) {
+        if (!validRoles.includes(session.user.role)) {
+        return NextResponse.redirect(new URL('/api/auth/unauthorized', req.url));
+        }
     }
 
 
@@ -34,5 +48,5 @@ export async function middleware(req:NextRequest| any) {
 // )
 
 export const config = {
-    matcher: ['/checkout/:path*'],
+    matcher: ['/checkout/:path*',  '/admin/:path*', '/api/admin/:path*'],
 }
