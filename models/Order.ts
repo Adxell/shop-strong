@@ -1,5 +1,8 @@
 import mongoose, { Schema, model, Model } from "mongoose";
 import { IOrder } from '../interfaces'
+
+
+
 const orderSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User'},
     orderItems: [{
@@ -33,6 +36,6 @@ const orderSchema = new Schema({
     timestamps: true,
 })
 
-const Order: Model<IOrder> = mongoose.models.Order || model('Order', orderSchema)
+const Order: Model<IOrder> = mongoose.models.Order || model<IOrder>('Order', orderSchema)
 
 export default Order;
