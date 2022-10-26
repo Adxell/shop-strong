@@ -14,16 +14,9 @@ type Data = {
 }
 
 export default async function handler (req: NextApiRequest, res: NextApiResponse<Data>){
-
-    await db.connect()
-    // const numberOfOrder= await Order.count()
-    // const paidOrders= await Order.find({isPaid: true}).count()
-    // const numberOfCLients= await User.find({role: 'client'}).count()
-    // const numberOfProducts= await Product.count()
-    // const productsWithNoInventory= await Product.find({inStock: 0 }).count()
-    // const lowInventory= await Product.find({inStock: { $lte: 10 } }).count()
-
-    const [
+    try {
+        await db.connect()
+           const [
         numberOfOrder,
         paidOrders,
         numberOfCLients,
@@ -49,4 +42,16 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
         productsWithNoInventory,
         lowInventory,
     })
+    } catch (error) {
+        await db.disconnect()
+        console.log(error)
+    }
+    // const numberOfOrder= await Order.count()
+    // const paidOrders= await Order.find({isPaid: true}).count()
+    // const numberOfCLients= await User.find({role: 'client'}).count()
+    // const numberOfProducts= await Product.count()
+    // const productsWithNoInventory= await Product.find({inStock: 0 }).count()
+    // const lowInventory= await Product.find({inStock: { $lte: 10 } }).count()
+
+ 
 }

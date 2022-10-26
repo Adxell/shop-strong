@@ -110,7 +110,6 @@ const OrderDescription: NextPage<Props> = ({ order }) => {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, query }) => {
     const { orderId = '' } = query;
-
     const order = await dbOrders.getOrderById(orderId.toString());
 
 

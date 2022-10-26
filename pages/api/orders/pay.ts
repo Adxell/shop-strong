@@ -81,6 +81,7 @@ const payOrder = async(req: NextApiRequest, res: NextApiResponse<Data>) => {
         await db.disconnect()
         return res.status(200).json({message: 'Orden pagada'})
     } catch (error) {
+        await db.disconnect()
         return res.status(400).json({message: 'La orden no ha sido procesada'})
     }
 }

@@ -21,16 +21,25 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
 }
 
 const getProductsBySlug = async (req: NextApiRequest, res: NextApiResponse<Data>)  => {
-    const { slug } = req.query;
-    
-    await db.connect()
-    const ProductBySlug = await Product.findOne({slug}).lean()
-    await db.disconnect()
-
-    if( !ProductBySlug ) {
+    try {
+        const { slug } = req.query;
+        
+        await db.connect()
+        const ProductBySlug = await Product.findOne({slug}).lean()
         await db.disconnect()
-        return res.status(400).json( { message: 'Dosnt entry with that id'} )
+    
+        if( !ProductBySlug ) {
+            await db.disconnect()
+            return res.status(400).json( { message: 'Dosnt entry with that id'} )
+        }
+    
+        ProductBySlug.images = ProductBySlug.images.map( image => {
+            return image.includes('http') ? image : `${process.env.HOST_NAME}products/${image}` 
+        })
+    
+        return res.status(200).json( ProductBySlug )
+    } catch (error) {
+        await db.disconnect()
+        console.log(error)
     }
-
-    return res.status(200).json( ProductBySlug )
 }

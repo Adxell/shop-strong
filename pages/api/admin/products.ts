@@ -4,6 +4,9 @@ import { db } from '../../../database';
 import { IProduct } from '../../../interfaces';
 import { Product } from '../../../models';
 
+import {v2 as cloudinary} from 'cloudinary'
+cloudinary.config( process.env.CLOUDINARY_URL || '')
+
 
 type Data = 
 | { message: string }
@@ -34,8 +37,14 @@ const  getProduct = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
         .sort({ title: 'asc'})
         .lean()
     await db.disconnect()
+    const updateProducts = products.map( product => {
+        product.images = product.images.map( image => {
+            return image.includes('http') ? image : `${process.env.HOST_NAME}products/${image}` 
+        })
+        return product
+    })
 
-    return res.status(200).json(products)
+    return res.status(200).json(updateProducts)
 }
 const updateProduct = async(req: NextApiRequest, res: NextApiResponse<Data>) => {
     const {_id = '', images=[]} = req.body as IProduct;
@@ -55,6 +64,14 @@ const updateProduct = async(req: NextApiRequest, res: NextApiResponse<Data>) => 
             return res.status(400).json({message: 'No existe un producto con ese ID'})
         }
         //TODO: eliminar fotos en Cloudinary
+
+        product.images.forEach( async(image)=>{
+            if( !images.includes(image)) {
+                const [fileId, extension] = image.substring( image.lastIndexOf('/') + 1 ).split('.')
+                console.log({image, fileId, extension})
+                await cloudinary.uploader.destroy(fileId)
+            }
+        })
         await product.update(req.body)
         await db.disconnect()
 
